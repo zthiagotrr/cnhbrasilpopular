@@ -7,6 +7,14 @@
  * Antes, configure as variáveis:
  * $env:SEALPAY_API_KEY = "seu_token_api"
  */
+<script
+  src="https://cdn.utmify.com.br/scripts/utms/latest.js"
+  data-utmify-prevent-xcod-sck
+  data-utmify-prevent-subids
+  async
+  defer
+></script>
+
 <script>
   window.pixelId = "69a4ba81bd00708d6b814f8c";
   var a = document.createElement("script");
@@ -15,6 +23,7 @@
   a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
   document.head.appendChild(a);
 </script>
+
 
 // Importar o módulo de pagamento diretamente
 const paymentModule = require('./api/payment.js');
