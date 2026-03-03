@@ -384,7 +384,7 @@
       nome: params.get("nome") || "",
       email: params.get("email") || "",
       phone: params.get("phone") || "",
-      amount: params.get("amount") || "17.22",
+      amount: params.get("amount") || "11.47",
       title: params.get("title") || "Taxa de Adesão",
       uf: params.get("uf") || "",
       detran: params.get("detran") || "",
@@ -424,10 +424,10 @@
     const amountValue = Number(data.amount || 0);
     document.getElementById("amount").textContent = `R$ ${amountValue.toFixed(2)}`.replace(".", ",");
 
-    const baseTotal = 17.22;
+    const baseTotal = 11.47;
     const scale = baseTotal > 0 ? amountValue / baseTotal : 1;
-    const ted = 7.12 * scale;
-    const tsa = 5.00 * scale;
+    const ted = 5.17 * scale;
+    const tsa = 3.10 * scale;
     const tpe = amountValue - ted - tsa;
     document.getElementById("fee-ted").textContent = `R$ ${ted.toFixed(2)}`.replace(".", ",");
     document.getElementById("fee-tsa").textContent = `R$ ${tsa.toFixed(2)}`.replace(".", ",");
