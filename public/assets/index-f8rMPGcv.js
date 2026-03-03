@@ -35471,9 +35471,11 @@ function uT() {
           }),
           l.jsx("div", {
             className: "mb-8",
-            children: l.jsx("img", {
-              src: "https://img.portalmarcossantos.com.br/wp-content/uploads/2025/12/09150903/Detran-AM-participa-do-lancamento-do-programa-CNH-do-Brasil-confira-novas-regras-para-obter-o-documento.jpeg",
-              alt: "Lançamento do Programa CNH do Brasil",
+            children: l.jsx("video", {
+              src: "https://autoescola-news.site/gov.mp4",
+              controls: !0,
+              playsInline: !0,
+              preload: "metadata",
               className: "w-full rounded-lg shadow-md",
             }),
           }),
