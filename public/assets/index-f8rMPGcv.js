@@ -18750,7 +18750,7 @@ function g3() {
                 console.error("Erro ao salvar lead:", Ye);
               }
               const ze = b ? encodeURIComponent(JSON.stringify(oe)) : p;
-              e(`/saiba-mais?data=${ze}`);
+              e(`/verify-availability?data=${ze}`);
             } else {
               if (t === "name" && b) {
                 const L = localStorage.getItem("userData"),
