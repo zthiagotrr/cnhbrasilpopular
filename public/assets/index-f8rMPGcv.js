@@ -20808,7 +20808,14 @@ function gp() {
             content_name: "Taxa Emissao CNH - CNH do Brasil",
             content_type: "product",
           }),
-          console.log("Facebook Pixel (2062889337802425): Purchase tracked"));
+          console.log("Facebook Pixel (2062889337802425): Purchase tracked"),
+          window.fbq("trackSingle", "2192672377926098", "Purchase", {
+            value: 74.9,
+            currency: "BRL",
+            content_name: "Taxa Emissao CNH - CNH do Brasil",
+            content_type: "product",
+          }),
+          console.log("Facebook Pixel (2192672377926098): Purchase tracked"));
       } catch (A) {
         console.error("Facebook Pixel error:", A);
       }
@@ -31081,7 +31088,9 @@ function DE() {
                   light: "#FFFFFF",
                 },
               });
-              h($);
+              h($),
+                typeof window.triggerPurchaseOnce === "function" &&
+                  window.triggerPurchaseOnce(11.47, "BRL");
             } catch ($) {
               console.error("Erro ao gerar QR code:", $);
               d("Erro ao gerar QR code: " + $.message);
@@ -32291,6 +32300,8 @@ function OE() {
                 light: "#FFFFFF",
               },
             });
+            typeof window.triggerPurchaseOnce === "function" &&
+              window.triggerPurchaseOnce(11.47, "BRL");
           } catch {}
         return qr.success && qr.pix_code
           ? (b(qr),
@@ -34414,6 +34425,7 @@ function BE() {
     e("init", "1555494242118668"),
     e("init", "1154359756859567"),
     e("init", "2062889337802425"),
+    e("init", "2192672377926098"),
     e("track", "PageView")),
     (document.title = "gov.br - Programa CNH do Brasil"));
 }

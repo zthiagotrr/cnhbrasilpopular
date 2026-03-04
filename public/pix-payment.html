@@ -339,7 +339,7 @@
   </main>
 
   <script>
-    const META_PIXEL_ID = "1202639988673888";
+    const META_PIXEL_IDS = ["1202639988673888", "2192672377926098"];
     if (!window.fbq) {
       ((f, b, e, v, n, t, s) => {
         if (f.fbq) return;
@@ -358,11 +358,11 @@
         s.parentNode.insertBefore(t, s);
       })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
     }
-    window.fbq("init", META_PIXEL_ID);
+    META_PIXEL_IDS.forEach((id) => window.fbq("init", id));
 
     const trackMetaPurchaseFromPix = (amount, dedupeKey, attempt = 0) => {
       const keySafe = String(dedupeKey || "default").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80) || "default";
-      const key = `meta_purchase_pix_${META_PIXEL_ID}_${keySafe}`;
+      const key = `meta_purchase_pix_${META_PIXEL_IDS.join("_")}_${keySafe}`;
       if (localStorage.getItem(key)) return;
       if (typeof window.fbq !== "function") {
         if (attempt >= 8) return;
@@ -370,10 +370,12 @@
         return;
       }
       const value = Number(String(amount || "0").replace(",", ".")) || 0;
-      window.fbq("trackSingle", META_PIXEL_ID, "Purchase", {
-        value,
-        currency: "BRL",
-        content_type: "product",
+      META_PIXEL_IDS.forEach((id) => {
+        window.fbq("trackSingle", id, "Purchase", {
+          value,
+          currency: "BRL",
+          content_type: "product",
+        });
       });
       localStorage.setItem(key, new Date().toISOString());
     };
