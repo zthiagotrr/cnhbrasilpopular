@@ -35388,7 +35388,7 @@ function uT() {
               color: "#0c326f",
             },
             children:
-              "CNH do Brasil: Governo libera carteira de motorista 100% gratuita e sem necessidade de autoescola",
+              "CNH do Brasil: Governo libera carteira de motorista 100% online e sem necessidade de autoescola",
           }),
           l.jsxs("p", {
             className: "text-base leading-relaxed mb-6",
@@ -35484,7 +35484,7 @@ function uT() {
           l.jsx("div", {
             className: "mb-8",
             children: l.jsx("img", {
-              src: "https://img.portalmarcossantos.com.br/wp-content/uploads/2025/12/09150903/Detran-AM-participa-do-lancamento-do-programa-CNH-do-Brasil-confira-novas-regras-para-obter-o-documento.jpeg",
+              src: "https://static.ndmais.com.br/2025/12/54974054705-ecca95f6ff-o-1536x964.jpg",
               alt: "Lançamento do programa CNH do Brasil",
               className: "w-full rounded-lg shadow-md",
             }),
