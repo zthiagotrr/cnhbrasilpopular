@@ -637,6 +637,7 @@ async function handlePaymentRequest(req, res) {
     const callbackUrl =
       process.env.VENO_CALLBACK_URL ||
       (requestHostWithProtocol ? `${requestHostWithProtocol}/api/freepay/webhook` : "");
+    const payerPhone = (customer.cellphone || "").toString().replace(/\D/g, "");
     const payload = {
       amount: amountCents,
       description: FIXED_TITLE,
@@ -649,7 +650,10 @@ async function handlePaymentRequest(req, res) {
         name: customer.name,
         email: customer.email,
         document: customer.taxId,
+        phone: payerPhone || undefined,
+        cellphone: payerPhone || undefined,
       },
+      phone: payerPhone || undefined,
       utm_source: trackingParameters.utm_source,
       utm_campaign: trackingParameters.utm_campaign,
       utm_medium: trackingParameters.utm_medium,
