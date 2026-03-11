@@ -1,11 +1,11 @@
-// SealPay API Integration
-// Pagamento via PIX com SealPay Gateway
+// Veno Payments API Integration
+// Pagamento via PIX com Veno Payments Gateway
 
 const db = require("./_db");
 const nodemailer = require("nodemailer");
 const QRCode = require("qrcode");
 
-const SEALPAY_BASE_URL = process.env.SEALPAY_BASE_URL || "https://abacate-5eo1.onrender.com";
+const VENO_BASE_URL = process.env.VENO_BASE_URL || "https://beta.venopayments.com/api";
 const UTMIFY_API_URL = process.env.UTMIFY_API_URL || "https://api.utmify.com.br/api-credentials/orders";
 
 const DETRAN_BADGE_BY_UF = {
@@ -413,7 +413,7 @@ async function sendUtmifyOrder({
   gatewayFeeInCents = 0,
   userCommissionInCents,
   paymentMethod = "pix",
-  platform = "SealPay",
+  platform = "VenoPayments",
 }) {
   if (!token) return;
   const payload = {
@@ -518,12 +518,12 @@ async function handlePaymentRequest(req, res) {
   }
 
   try {
-    const SEALPAY_API_KEY = process.env.SEALPAY_API_KEY;
+    const VENO_API_KEY = process.env.VENO_API_KEY;
 
-    if (!SEALPAY_API_KEY) {
+    if (!VENO_API_KEY) {
       return res.status(500).json({
         success: false,
-        message: "Credenciais da SealPay não configuradas",
+        message: "Credenciais da Veno Payments não configuradas",
       });
     }
 
@@ -632,20 +632,31 @@ async function handlePaymentRequest(req, res) {
       return { utm, src };
     })();
 
+    const trackingParameters = buildTrackingParameters(tracking || {});
+    const requestHostWithProtocol = requestHost ? `https://${requestHost}` : "";
+    const callbackUrl =
+      process.env.VENO_CALLBACK_URL ||
+      (requestHostWithProtocol ? `${requestHostWithProtocol}/api/freepay/webhook` : "");
     const payload = {
       amount: amountCents,
       description: FIXED_TITLE,
-      customer: {
+      callback_url: callbackUrl || undefined,
+      external_id:
+        bodyData.external_id ||
+        bodyData.externalId ||
+        `${Date.now()}-${cpfDigits || "lead"}`,
+      payer: {
         name: customer.name,
         email: customer.email,
-        cellphone: customer.cellphone,
-        taxId: customer.taxId,
+        document: customer.taxId,
       },
-      tracking,
-      api_key: SEALPAY_API_KEY,
-      fbp: bodyData.fbp || "",
-      fbc: bodyData.fbc || "",
-      user_agent: bodyData.user_agent || req.headers["user-agent"] || "",
+      utm_source: trackingParameters.utm_source,
+      utm_campaign: trackingParameters.utm_campaign,
+      utm_medium: trackingParameters.utm_medium,
+      utm_content: trackingParameters.utm_content,
+      utm_term: trackingParameters.utm_term,
+      src: trackingParameters.src,
+      sck: trackingParameters.sck,
     };
 
     const userAgent = bodyData.user_agent || req.headers["user-agent"] || "";
@@ -664,13 +675,19 @@ async function handlePaymentRequest(req, res) {
       ip: req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "",
     });
 
-    console.log("[PAYMENT] Enviando para SealPay...");
+    console.log("[PAYMENT] Enviando para Veno Payments...");
 
-    const resp = await fetch(`${SEALPAY_BASE_URL}/create-pix4`, {
+    const requestOrigin = req.headers.origin || requestHostWithProtocol || undefined;
+    const requestReferer = req.headers.referer || undefined;
+
+    const resp = await fetch(`${VENO_BASE_URL}/v1/pix`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        Authorization: `Bearer ${VENO_API_KEY}`,
+        ...(requestOrigin ? { Origin: requestOrigin } : {}),
+        ...(requestReferer ? { Referer: requestReferer } : {}),
       },
       body: JSON.stringify(payload),
     });
@@ -678,18 +695,18 @@ async function handlePaymentRequest(req, res) {
     const data = await resp.json().catch(() => ({}));
 
     if (!resp.ok) {
-      console.error("[PAYMENT] Erro SealPay:", resp.status, data);
+      console.error("[PAYMENT] Erro Veno Payments:", resp.status, data);
       return res.status(502).json({
         success: false,
-        message: data?.error || "Falha ao criar PIX",
+        message: data?.error || data?.message || "Falha ao criar PIX",
         detalhes: data?.details || data?.detalhes,
       });
     }
 
     const txData = data || {};
-    const tx = txData?.txid || txData?.id || "";
-    const pixText = txData?.pix_code || "";
-    const pixQr = txData?.pix_qr_code || txData?.qr_code || "";
+    const tx = txData?.id || txData?.txid || "";
+    const pixText = txData?.pix_copy_paste || txData?.qr_code || txData?.qr_code_image || "";
+    const pixQr = txData?.qr_code_image || txData?.qr_code || txData?.pix_copy_paste || "";
     const looksLikeBase64 = (value) =>
       typeof value === "string" &&
       value.length > 100 &&
@@ -704,6 +721,8 @@ async function handlePaymentRequest(req, res) {
     const pixQrWithPrefix = pixQr
       ? pixQr.startsWith("data:image")
         ? pixQr
+        : pixQr.startsWith("000201") || pixQr.includes("br.gov.bcb.pix")
+          ? pixQr
         : pixQr.startsWith("http")
           ? pixQr
           : pixQr.startsWith("base64,")
@@ -757,8 +776,6 @@ async function handlePaymentRequest(req, res) {
         priceInCents: amountCents,
       },
     ];
-    const trackingParameters = buildTrackingParameters(tracking || {});
-
     await sendUtmifyOrder({
       token: UTMIFY_API_TOKEN,
       orderId: String(tx),
@@ -772,7 +789,7 @@ async function handlePaymentRequest(req, res) {
       gatewayFeeInCents: 0,
       userCommissionInCents: amountCents,
       paymentMethod: "pix",
-      platform: "SealPay",
+      platform: "VenoPayments",
     });
 
     let emailQrCode = pixQrWithPrefix || "";

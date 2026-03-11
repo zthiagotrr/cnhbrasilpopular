@@ -1,25 +1,24 @@
-const SEALPAY_STATUS_URL = process.env.SEALPAY_STATUS_URL || "";
+const VENO_BASE_URL = process.env.VENO_BASE_URL || "https://beta.venopayments.com/api";
 
 module.exports = async (req, res) => {
   try {
     if (req.method !== "GET") return res.status(405).send("Method Not Allowed");
 
-    if (!SEALPAY_STATUS_URL) {
-      return res.status(500).json({ success: false, message: "SEALPAY_STATUS_URL não configurada" });
+    const venoApiKey = process.env.VENO_API_KEY;
+    if (!venoApiKey) {
+      return res.status(500).json({ success: false, message: "VENO_API_KEY não configurada" });
     }
 
     const id = String(req.query.id || req.query.transaction_id || "").trim();
     if (!id) return res.status(400).json({ success: false, message: "id é obrigatório" });
 
-    const url = SEALPAY_STATUS_URL.includes("{id}")
-      ? SEALPAY_STATUS_URL.replace("{id}", encodeURIComponent(id))
-      : `${SEALPAY_STATUS_URL}${SEALPAY_STATUS_URL.includes("?") ? "&" : "?"}id=${encodeURIComponent(id)}`;
+    const url = `${VENO_BASE_URL}/v1/pix/${encodeURIComponent(id)}/status`;
 
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
         Accept: "application/json",
+        Authorization: `Bearer ${venoApiKey}`,
       },
     });
 
@@ -27,7 +26,7 @@ module.exports = async (req, res) => {
 
     if (response.ok) {
       const txData = Array.isArray(data?.data) ? data.data[0] : data?.data || data;
-      const status = txData?.status || data?.status || data?.payment_status || "PENDING";
+      const status = String(txData?.status || data?.status || data?.payment_status || "pending").toLowerCase();
       return res.json({ success: true, status, transaction: txData || data });
     }
 

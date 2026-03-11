@@ -11,7 +11,7 @@ async function sendUtmifyPaid({ token, orderId, createdAt, approvedDate, custome
   if (!token) return;
   const payload = {
     orderId: String(orderId),
-    platform: "SealPay",
+    platform: "VenoPayments",
     paymentMethod: "pix",
     status: "paid",
     createdAt: formatUtcDate(createdAt),
@@ -55,7 +55,7 @@ async function safeGetLeadByTransactionId(id) {
     );
     return result.rows[0] || null;
   } catch (error) {
-    console.error("[SEALPAY WEBHOOK] erro ao buscar lead:", error.message || error);
+    console.error("[VENO WEBHOOK] erro ao buscar lead:", error.message || error);
     return null;
   }
 }
@@ -73,22 +73,24 @@ module.exports = async (req, res) => {
 
     const data = Array.isArray(body?.data) ? body.data[0] : body?.data || body;
     const statusRaw = data?.status || body?.status || "";
-    const status = String(statusRaw).toUpperCase();
+    const status = String(statusRaw).toLowerCase();
     const event = body?.event || body?.type || "";
     const id =
+      data?.id ||
       data?.txid ||
       data?.transactionId ||
       data?.transaction_id ||
-      data?.id ||
+      data?.external_id ||
       body?.txid ||
       body?.transactionId ||
       body?.transaction_id ||
       body?.id ||
+      body?.external_id ||
       "";
 
-    console.log("[SEALPAY WEBHOOK]", { id, status, event, payload: body });
+    console.log("[VENO WEBHOOK]", { id, status, event, payload: body });
 
-    const isPaid = event === "transaction.paid" || status === "PAID";
+    const isPaid = event === "transaction.paid" || event === "pix.paid" || event === "deposit.paid" || status === "paid";
 
     if (isPaid && id) {
       if (db.getConnectionString()) {
@@ -139,7 +141,7 @@ module.exports = async (req, res) => {
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error("[SEALPAY WEBHOOK] erro:", error);
+    console.error("[VENO WEBHOOK] erro:", error);
     return res.status(500).json({ success: false });
   }
 };

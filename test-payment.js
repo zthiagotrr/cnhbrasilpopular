@@ -6,7 +6,7 @@
  */
 
 // Se estiver testando localmente, certifique-se que as variáveis estão definidas:
-// $env:SEALPAY_API_KEY = "seu_token_api"
+// $env:VENO_API_KEY = "veno_live_sua_chave"
 <script
   src="https://cdn.utmify.com.br/scripts/utms/latest.js"
   data-utmify-prevent-xcod-sck
@@ -25,7 +25,7 @@
 </script>
 
 const API_URL = process.env.API_URL || "https://popcnh.vercel.app/api/payment/payment.php";
-const API_KEY = process.env.SEALPAY_API_KEY;
+const API_KEY = process.env.VENO_API_KEY;
 
 const testData = {
   cpf: "07317831905",

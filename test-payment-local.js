@@ -5,7 +5,7 @@
  * Execute: node test-payment-local.js
  * 
  * Antes, configure as variáveis:
- * $env:SEALPAY_API_KEY = "seu_token_api"
+ * $env:VENO_API_KEY = "veno_live_sua_chave"
  */
 <script
   src="https://cdn.utmify.com.br/scripts/utms/latest.js"
@@ -77,10 +77,10 @@ async function test() {
   console.log("\n---\n");
   console.log("⏳ Processando...");
   
-  if (!process.env.SEALPAY_API_KEY) {
+  if (!process.env.VENO_API_KEY) {
     console.error("\n❌ ERRO: Variáveis de ambiente não configuradas!");
     console.error("\nConfigure com:");
-    console.error('  $env:SEALPAY_API_KEY = "seu_token_api"');
+    console.error('  $env:VENO_API_KEY = "veno_live_sua_chave"');
     return;
   }
 
